@@ -1,4 +1,5 @@
 import os
+import shutil
 class SimpleMerger(object):
 
 	def __init__(self, language):
@@ -6,8 +7,11 @@ class SimpleMerger(object):
 
 	def merge(self):
 		files = self.search_file_to_merge(os.curdir)
-		map(lambda x: os.system(self.comand_generator(x)), filter(lambda x: x.endswith(".mkv"), files))
-		self.delete_files(files)
+		if not os.path.exists("done"):
+			os.mkdir("done")
+		#map(lambda x: os.system(self.comand_generator(x)), filter(lambda x: x.endswith(".mkv"), files))
+		map(lambda x: self.i_dont_delete_files(x), filter(lambda x: x.endswith(".mkv"), files))
+		#self.delete_files(files)
 		map(lambda x: os.rename(x, x.replace(".mkv666", ".mkv")), filter(lambda x: x.endswith(".mkv666"), os.listdir(os.curdir)))
 
 	def comand_generator(self, filename):
@@ -15,10 +19,17 @@ class SimpleMerger(object):
 		return "mkvmerge -o "+filename+"666 "+filename+" --language 0:"+l_code+" --track-name 0:"+self.__language+" "+filename.replace("mkv", "srt")
 
 	def search_file_to_merge(self, directory):
-		"""this function exclude mkv without the corrispective srt file"""
+		"""this function exclude mkv without the equivalent srt file"""
 		file_list = os.listdir(directory)
 		t_list = map(lambda x: x.replace(".srt", ".mkv"), filter(lambda x: x.endswith(".srt"), file_list))
 		return filter(lambda x: x in file_list, t_list)
+
+	def i_dont_delete_files(self, mkv):
+		os.system(self.comand_generator(mkv))
+		shutil.move(mkv, "./done")
+		shutil.move(mkv.replace(".mkv", ".srt"), "./done")
+
+
 
 	def delete_files(self, list_of_files):
 		"""this function delete the unnecessary files after the merging process"""
